@@ -65,6 +65,10 @@ app.get('/trending', function(req, res){
 
             $('.repo-list-item').each(function (i, elem){
 
+                if(i > 10){
+                    return;
+                }
+
                 var title = $(this).find('.repo-list-name').find('a')
                     .text().trim().replace(/(\r\n|\n|\r|\s)/g,'');
                 
