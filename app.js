@@ -7,11 +7,36 @@ var async = require('async');
 var request = require('request');
 var cheerio = require('cheerio');
 var _ = require('lodash');
+var CronJob = require('cron').CronJob;
 
 /*
  * settings
  */
 var trendingUrl = 'https://github.com/trending';
+
+// var apiOutput;
+
+// var dately = new CronJob({
+//   cronTime: '* */10 * * * *',
+//   onTick: function() {
+//     console.log(1);
+//   },
+//   start: true,
+//   timeZone: 'America/Los_Angeles'
+// });
+
+// var weekly = new CronJob({
+//   cronTime: '* */10 * * * *',
+//   onTick: function() {
+//     console.log(1);
+//   },
+//   start: true,
+//   timeZone: 'America/Los_Angeles'
+// });
+
+// updateGithub.start();
+
+
 
 
 /*
@@ -72,10 +97,10 @@ app.get('/trending', function(req, res){
     ], function (err, output){
         
         if(err){
-            return res.json(err);
+            return res.jsonp(err);
         }
 
-        res.json(output);
+        res.jsonp(output);
     });
 });
 
