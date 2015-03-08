@@ -79,19 +79,34 @@ app.get('/trending', function(req, res){
 
                 var url = $(this).find('.repo-list-name').find('a').attr('href');
 
+                var dataArr = {
+                    language: '',
+                    starts: 0
+                };
+
                 var infoArr = $(this).find('.repo-list-meta')
                     .text().trim().replace(/(\r\n|\n|\r|\s)/g,'').split('•');
 
                 var starts = infoArr[1].match(/^([0-9]+)/) ? 
                     parseInt(infoArr[1].match(/^([0-9]+)/)[0], 10) : 0;
+
+
+                if(infoArr.length < 3){
+                    dataArr.starts = infoArr[0].match(/^([0-9]+)/) ? 
+                    parseInt(infoArr[0].match(/^([0-9]+)/)[0], 10) : 0;
+                }else{
+                    dataArr.language = infoArr[0];
+                    dataArr.starts = infoArr[1].match(/^([0-9]+)/) ? 
+                    parseInt(infoArr[1].match(/^([0-9]+)/)[0], 10) : 0;
+                }
                 
                 output.push({
                     title: title,
                     description: description,
                     url: url,
                     owner: owner,
-                    language: infoArr[0],
-                    starts: starts,
+                    language: dataArr.language,
+                    starts: dataArr.starts
                 });
             });
 
