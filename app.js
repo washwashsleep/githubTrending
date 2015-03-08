@@ -24,7 +24,12 @@ app.get('/trending', function(req, res){
     async.waterfall([
 
         function (cb){
-            request(trendingUrl, cb);
+
+            if(!req.query.since){
+                req.query.since = '';
+            }
+
+            request(trendingUrl + '?since=' + req.query.since, cb);
         },
 
         function (response, body, cb){
@@ -74,4 +79,4 @@ app.get('/trending', function(req, res){
     });
 });
 
-app.listen(3000);
+app.listen(4040);
