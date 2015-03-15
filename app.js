@@ -14,35 +14,7 @@ var CronJob = require('cron').CronJob;
  */
 var trendingUrl = 'https://github.com/trending';
 
-// var apiOutput;
-
-// var dately = new CronJob({
-//   cronTime: '* */10 * * * *',
-//   onTick: function() {
-//     console.log(1);
-//   },
-//   start: true,
-//   timeZone: 'America/Los_Angeles'
-// });
-
-// var weekly = new CronJob({
-//   cronTime: '* */10 * * * *',
-//   onTick: function() {
-//     console.log(1);
-//   },
-//   start: true,
-//   timeZone: 'America/Los_Angeles'
-// });
-
-// updateGithub.start();
-
-
-
-
-/*
- * routes
- */
-app.get('/trending', function(req, res){
+var getData = function (next){
 
     var $;
 
@@ -50,11 +22,7 @@ app.get('/trending', function(req, res){
 
         function (cb){
 
-            if(!req.query.since){
-                req.query.since = '';
-            }
-
-            request(trendingUrl + '?since=' + req.query.since, cb);
+            request(trendingUrl, cb);
         },
 
         function (response, body, cb){
@@ -87,10 +55,6 @@ app.get('/trending', function(req, res){
                 var infoArr = $(this).find('.repo-list-meta')
                     .text().trim().replace(/(\r\n|\n|\r|\s)/g,'').split('•');
 
-                var starts = infoArr[1].match(/^([0-9]+)/) ? 
-                    parseInt(infoArr[1].match(/^([0-9]+)/)[0], 10) : 0;
-
-
                 if(infoArr.length < 3){
                     dataArr.starts = infoArr[0].match(/^([0-9]+)/) ? 
                     parseInt(infoArr[0].match(/^([0-9]+)/)[0], 10) : 0;
@@ -116,10 +80,79 @@ app.get('/trending', function(req, res){
     ], function (err, output){
         
         if(err){
-            return res.jsonp(err);
+            console.log('------------ error ------------');
+            console.log(err);
+            console.log('------------ error ------------');
         }
 
-        res.jsonp(output);
+        if(!output){
+            console.log('------------ error ------------');
+            console.log('Output not found');
+            console.log('------------ error ------------');
+        }
+
+        outputData = output;
+
+        if(next && (next instanceof Function)){
+            next();
+        }
+    });
+
+};
+
+var dately = new CronJob({
+  cronTime: '* */30 * * * *',
+  onTick: function() {
+    console.log('outputData update');
+    getData();
+  },
+  start: true,
+  timeZone: 'America/Los_Angeles'
+});
+
+dately.start();
+
+
+var outputData = null;
+
+
+/*
+ * routes
+ */
+app.get('/trending', function (req, res){
+
+    async.waterfall([
+
+        function (cb){
+
+            if(outputData){
+                console.log('--------- info ---------');
+                console.log('OutputData Alive');
+                console.log('--------- info ---------');
+                return cb();
+            }
+
+            console.log('--------- info ---------');
+            console.log('Get Data');
+            console.log('--------- info ---------');
+            getData(cb);
+        },
+
+    ], function (err){
+        
+        if(err){
+            return res.jsonp({
+                error: err.toString()
+            });
+        }
+
+        if(!outputData){
+           return res.jsonp({
+                error: new Error('OutputData not found.').toString()
+           }); 
+        }
+
+        res.jsonp(outputData);
     });
 });
 
